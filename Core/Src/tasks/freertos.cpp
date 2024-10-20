@@ -21,6 +21,7 @@
 #include "FreeRTOS.h"
 
 #include "cmsis_os.h"
+#include "heartbeat.h"
 #include "main.h"
 #include "task.h"
 
@@ -61,12 +62,6 @@ const osThreadAttr_t defaultTask_attributes = {
     .priority = (osPriority_t)osPriorityNormal,
 };
 
-osThreadId_t heartbeatTaskHandle;
-const osThreadAttr_t heartbeatTask_attributes = {
-    .name = "heartbeatTask",
-    .stack_size = 128 * 4,
-    .priority = (osPriority_t)osPriorityNormal,
-};
 /* Definitions for myQueue01 */
 osMessageQueueId_t myQueue01Handle;
 uint8_t myQueue01Buffer[16 * sizeof(uint16_t)];
@@ -132,7 +127,6 @@ const osEventFlagsAttr_t myEvent01_attributes = {
 /* USER CODE END FunctionPrototypes */
 
 void StartDefaultTask(void *argument);
-void StartHeartbeatTask(void *argument);
 void Callback01(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
@@ -188,7 +182,7 @@ void MX_FREERTOS_Init(void) {
     /* Create the thread(s) */
     /* creation of defaultTask */
     defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
-    heartbeatTaskHandle = osThreadNew(StartHeartbeatTask, NULL, &heartbeatTask_attributes);
+    heartbeatTaskInit();
 
     /* USER CODE BEGIN RTOS_THREADS */
     /* add threads, ... */
@@ -214,16 +208,6 @@ void StartDefaultTask(void *argument) {
     /* Infinite loop */
     for (;;) {
         osDelay(1);
-    }
-    /* USER CODE END StartDefaultTask */
-}
-void StartHeartbeatTask(void *argument) {
-    /* USER CODE BEGIN StartDefaultTask */
-    /* Infinite loop */
-    HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
-    for (;;) {
-        HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-        osDelay(1000);
     }
     /* USER CODE END StartDefaultTask */
 }
